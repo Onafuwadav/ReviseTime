@@ -1,0 +1,101 @@
+<StartScreen>:
+    orientation: "vertical"
+    FloatLayout:
+        canvas.before:
+            Color:
+                rgba: 0, 255, 255, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        BoxLayout:
+            pos_hint: {"center_x": 0.5, "center_y": 1}
+            size_hint: [1, 0.8]
+            canvas.before:
+                Color:
+                    rgba: 0, 255, 0, 1
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [0, 0, 40, 40]
+        BoxLayout:
+            size_hint: [0.6, 0.7]
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            MDCard:
+                orientation: "vertical"
+                BoxLayout:
+                    orientation: "vertical"
+                    Label:
+                        text: "[color=000000]ReviseTime[/color]"
+                        markup: True
+                        text_size: self.size
+                        font_size: 35
+                        bold: True
+                        halign: 'center'
+                        valign: 'middle'
+                    AnchorLayout:
+                        anchor_x: 'center'
+                        anchor_y: 'center'
+                        Image:
+                            source: 'images/img1.jpg'
+                            size_hint: None, None
+                    MDTextField:
+                        id: email
+                        hint_text: "E-mail"
+                        helper_text: "E-mail"
+                        size_hint_x: 0.8
+                        write_tab: False
+                        pos_hint: {"center_x": 0.5}
+                    MDTextField:
+                        id: passwd
+                        hint_text: "Password"
+                        helper_text: "Password"
+                        size_hint_x: 0.8
+                        write_tab: False
+                        pos_hint: {"center_x": 0.5}
+                        password: True
+                    BoxLayout:
+                        orientation: "vertical"
+                        MDFillRoundFlatButton:
+                            text: "SIGN IN"
+                            size_hint_x: 0.8
+                            pos_hint: {"center_x": 0.5}
+                            on_release:  root.login()
+                        MDRectangleFlatButton:
+                            text: "Don't have an account?"
+                            pos_hint: {"center_x": 0.5}
+                            on_release:  root.SignUpScreens()
+
+<Sign_Up_Screen>:
+    btn:btn
+    orientation: "vertical"
+    TextInput:
+        id: text1
+        size_hint: [1, 0.2]
+        hint_text: "Forename"
+        multiline: False
+        write_tab: False
+        on_text_validate: focus = True
+    TextInput:
+        id: text1
+        size_hint: [1, 0.2]
+        hint_text: "Enter email"
+        multiline: False
+        write_tab: False
+        on_text_validate: focus = True
+    TextInput:
+        id: text2
+        size_hint: [1, 0.2]
+        hint_text: "Enter password"
+        multiline: False
+        write_tab: False
+    TextInput:
+        id: text2
+        size_hint: [1, 0.2]
+        hint_text: "Re-enter password"
+        multiline: False
+        write_tab: False
+
+    Button:
+        id: btn
+        size_hint: [1, 0.2]
+        text: "Next Page"
