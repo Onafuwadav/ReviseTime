@@ -40,62 +40,137 @@
                             size_hint: None, None
                     MDTextField:
                         id: email
+                        icon_left: "email"
                         hint_text: "E-mail"
-                        helper_text: "E-mail"
+                        required: True
+                        helper_text_mode: "on_error"
+                        helper_text: "Email is required"
                         size_hint_x: 0.8
                         write_tab: False
                         pos_hint: {"center_x": 0.5}
                     MDTextField:
                         id: passwd
                         hint_text: "Password"
-                        helper_text: "Password"
+                        required: True
+                        helper_text_mode: "on_error"
+                        helper_text: "Password is required"
                         size_hint_x: 0.8
                         write_tab: False
                         pos_hint: {"center_x": 0.5}
                         password: True
+                        on_text_validate: root.authenticate()
                     BoxLayout:
                         orientation: "vertical"
                         MDFillRoundFlatButton:
                             text: "SIGN IN"
                             size_hint_x: 0.8
                             pos_hint: {"center_x": 0.5}
-                            on_release:  root.login()
                         MDRectangleFlatButton:
                             text: "Don't have an account?"
                             pos_hint: {"center_x": 0.5}
-                            on_release:  root.SignUpScreens()
+                            on_release: app.signup()
 
-<Sign_Up_Screen>:
-    btn:btn
+<SignUpScreen>:
     orientation: "vertical"
-    TextInput:
-        id: text1
-        size_hint: [1, 0.2]
+    spacing: "12dp"
+    size_hint_y: None
+    height: "250dp"
+    MDLabel:
+        text: ""
+        theme_text_color: "Error"
+        halign: "center"
+        font_size: 12
+        id: error
+    MDTextField:
+        id: forename
+        required: True
+        helper_text_mode: "on_error"
+        helper_text: "Forename is required"
+        write_tab: False
         hint_text: "Forename"
-        multiline: False
-        write_tab: False
-        on_text_validate: focus = True
-    TextInput:
-        id: text1
-        size_hint: [1, 0.2]
-        hint_text: "Enter email"
-        multiline: False
-        write_tab: False
-        on_text_validate: focus = True
-    TextInput:
-        id: text2
-        size_hint: [1, 0.2]
-        hint_text: "Enter password"
-        multiline: False
-        write_tab: False
-    TextInput:
-        id: text2
-        size_hint: [1, 0.2]
-        hint_text: "Re-enter password"
-        multiline: False
-        write_tab: False
 
-    Button:
-        id: btn
-        size_hint: [1, 0.2]
-        text: "Next Page"
+    MDTextField:
+        id: email
+        required: True
+        helper_text_mode: "on_error"
+        helper_text: "Email is required"
+        write_tab: False
+        hint_text: "Email"
+
+    MDTextField:
+        id: password
+        required: True
+        helper_text: "Must be 8 characters"
+        write_tab: False
+        hint_text: "Password"
+        helper_text_mode: "on_focus"
+
+    MDTextField:
+        id: password2
+        required: True
+        helper_text_mode: "on_error"
+        helper_text: "Password is required"
+        write_tab: False
+        hint_text: "Re-enter password"
+        password: True
+        on_text_validate: app.next_page(self)
+
+<SignUpScreen2>:
+    orientation: "vertical"
+    spacing: "12dp"
+    size_hint_y: None
+    height: "400dp"
+    MDLabel:
+        text: ""
+        theme_text_color: "Error"
+        halign: "center"
+        font_size: 12
+        id: error
+    MDTextField:
+        id: HL1
+        required: True
+        helper_text_mode: "on_error"
+        helper_text: "Enter subject"
+        write_tab: False
+        hint_text: "Higher Level subject 1"
+
+    MDTextField:
+        id: HL2
+        required: True
+        helper_text_mode: "on_error"
+        helper_text: "Enter subject"
+        write_tab: False
+        hint_text: "Higher Level subject 2"
+
+    MDTextField:
+        id: HL3
+        required: True
+        helper_text_mode: "on_error"
+        helper_text: "Enter subject"
+        write_tab: False
+        hint_text: "Higher Level subject 3"
+
+    MDTextField:
+        id: SL1
+        required: True
+        helper_text_mode: "on_error"
+        helper_text: "Enter subject"
+        write_tab: False
+        hint_text: "Standard Level subject 1"
+
+    MDTextField:
+        id: SL2
+        required: True
+        helper_text_mode: "on_error"
+        helper_text: "Enter subject"
+        write_tab: False
+        hint_text: "Standard Level subject 2"
+
+    MDTextField:
+        id: SL3
+        required: True
+        helper_text_mode: "on_error"
+        helper_text: "Enter subject"
+        write_tab: False
+        hint_text: "Standard Level subject 3"
+        on_text_validate: app.create_account(self)
