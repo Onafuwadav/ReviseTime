@@ -6,6 +6,7 @@ from kivy.uix.boxlayout import *
 from kivy.uix.popup import Popup
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager
+from kivy.uix.screenmanager import Screen
 from kivy.uix.textinput import TextInput
 from kivy.properties import ObjectProperty
 from kivymd import app
@@ -18,6 +19,9 @@ from kivy.core.window import Window
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton
 from kivy import utils
+import sqlite3
+
+con = sqlite3.connect('ReviseTime.db')
 
 Builder.load_file("kivy.kv")
 
@@ -33,7 +37,9 @@ class TouchApp(MDApp):
     def build(self):
         self.theme_cls.primary_palette = "Green"  # "Purple", "Red"
         self.theme_cls.primary_hue = "300"  # "500"
-        return StartScreen()
+        sm = ScreenManager()
+        sm.add_widget(StartScreen(name='start'))
+        return sm
 
     def signup(self):
         if not self.dialog:
@@ -62,6 +68,7 @@ class TouchApp(MDApp):
                 self.dialog.content_cls.ids.password.text != '' and self.dialog.content_cls.ids.password2.text != '':
             if len(self.dialog.content_cls.ids.password.text) >= 8:
                 if self.dialog.content_cls.ids.password.text == self.dialog.content_cls.ids.password2.text:
+                    self.dialog.content_cls.ids.error.text = ""
                     self.dialog.dismiss()
                     self.signup2()
                 else:
@@ -99,7 +106,7 @@ class TouchApp(MDApp):
             if x == "":
                 check = False
         for x in range(5):
-            for y in range(x+1, 6):
+            for y in range(x + 1, 6):
                 if subjects[x] == subjects[y]:
                     check = False
                     self.create.content_cls.ids.error.text = "No two subjects can be the same!"
@@ -109,10 +116,21 @@ class TouchApp(MDApp):
             if not check:
                 break
         if check:
+            self.create.content_cls.ids.error.text = ""
+            cur = con.cursor()
+            insert = ("INSERT INTO Settings(Name, Email, Password)"
+                      "VALUES (%s, %s, %s)")
+            data = (self.dialog.content_cls.ids.forename.text, self.dialog.content_cls.ids.email.text,
+                    self.dialog.content_cls.ids.password.text)
+            cur.execute(insert, data)
+            con.commit()
+            cur.execute("SELECT * FROM Settings")
+            print(cur.fetchall())
+            con.close()
             self.create.dismiss()
 
     def previous_page(self, obj):
-        self.dialog.dismiss()
+        self.create.dismiss()
         self.signup()
 
 
@@ -126,11 +144,11 @@ class SignUpScreen2(BoxLayout):
     pass
 
 
-class StartScreen(BoxLayout):
+class StartScreen(Screen):
     Window.size = (500, 600)
     btn = ObjectProperty(None)
 
-    def authenticate(self):
+    def signin(self):
         if self.ids.email.text == "Davefuwa127" and self.ids.passwd.text == "Davefuwa":
             print("welcome")
 

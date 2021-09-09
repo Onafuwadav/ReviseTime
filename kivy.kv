@@ -3,7 +3,7 @@
     FloatLayout:
         canvas.before:
             Color:
-                rgba: 0, 255, 255, 1
+                rgba: 223/255, 103/255, 140/255, 1
             Rectangle:
                 pos: self.pos
                 size: self.size
@@ -12,7 +12,7 @@
             size_hint: [1, 0.8]
             canvas.before:
                 Color:
-                    rgba: 0, 255, 0, 1
+                    rgba: 61/255, 21/255, 95/255, 1
                 RoundedRectangle:
                     pos: self.pos
                     size: self.size
@@ -65,10 +65,12 @@
                             text: "SIGN IN"
                             size_hint_x: 0.8
                             pos_hint: {"center_x": 0.5}
+                            on_release: app.signin()
                         MDRectangleFlatButton:
                             text: "Don't have an account?"
                             pos_hint: {"center_x": 0.5}
                             on_release: app.signup()
+
 
 <SignUpScreen>:
     orientation: "vertical"
