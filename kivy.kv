@@ -1,3 +1,191 @@
+#:import RippleTransition kivy.garden.moretransitions.RippleTransition
+#:import PixelTransition kivy.garden.moretransitions.PixelTransition
+#:import BlurTransition kivy.garden.moretransitions.BlurTransition
+#:import RVBTransition kivy.garden.moretransitions.RVBTransition
+
+<Screen_Manager>:
+    id: screen_manager
+    StartScreen:
+        id: 'start_screen'
+        name: 'start'
+        manager: 'screen_manager'
+    MainMenu:
+        id: 'main_menu'
+        name: 'menu'
+        manager: 'screen_manager'
+    WeeklyTimetable:
+        id: 'week'
+        name: 'weeklyTimetable'
+        manager: 'screen_manager'
+    Settings_Screen:
+        id: 'settings_screen'
+        name: 'settings'
+        manager: 'screen_manager'
+    Timers:
+        id: 'timer_screen'
+        name: 'Timer_screen'
+        manager: 'screen_manager'
+    TestDates:
+        id: 'input_test_dates'
+        name: 'testDates'
+        manager: 'screen_manager'
+
+<Settings_Screen>:
+    RelativeLayout:
+        canvas.before:
+            Color:
+                rgba: 223/255, 103/255, 140/255, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Spinner:
+            id: Spinner
+            size_hint: [0.1, 0.05]
+            pos_hint: {'left': 1, 'top': 1}
+            text: 'Settings'
+            values: ['Main Menu', 'Timer', 'Weekly Timetable', 'Input Test Dates']
+            on_text:
+                if Spinner.text == 'Main Menu': \
+                app.root.current = 'menu'
+                if Spinner.text == 'Timer': \
+                app.root.current = 'Timer_screen'
+                if Spinner.text == 'Weekly Timetable': \
+                app.root.current = 'weeklyTimetable'
+                if Spinner.text == 'Input Test Dates': \
+                app.root.current = 'testDates'
+
+
+<Timers>:
+    RelativeLayout:
+        canvas.before:
+            Color:
+                rgba: 223/255, 103/255, 140/255, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Spinner:
+            id: Spinner
+            size_hint: [0.1, 0.05]
+            pos_hint: {'left': 1, 'top': 1}
+            text: 'Timer'
+            values: ['Main Menu','Settings', 'Weekly Timetable', 'Input Test Dates']
+            on_text:
+                if Spinner.text == 'Main Menu': \
+                app.root.current = 'menu'
+                if Spinner.text == 'Settings': \
+                app.root.current = 'settings'
+                if Spinner.text == 'Weekly Timetable': \
+                app.root.current = 'weeklyTimetable'
+                if Spinner.text == 'Input Test Dates': \
+                app.root.current = 'testDates'
+    BoxLayout:
+        orientation: 'vertical'
+
+        Label:
+            id: time
+            text: '[b]00[/b]:00:00'
+        BoxLayout:
+            height: 90
+            orientation: 'horizontal'
+            padding: 20
+            spacing: 20
+            size_hint: (1, 0)
+
+            Button:
+                id: start_stop
+                text: 'Start'
+                on_press: self.start_stop()
+
+            Button:
+                id: reset
+                text: 'Reset'
+                on_press: self.reset()
+        Label:
+            id: stopwatch
+            text: '00:00.[size=40]00[/size]'
+
+<TestDates>:
+    RelativeLayout:
+        canvas.before:
+            Color:
+                rgba: 223/255, 103/255, 140/255, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Spinner:
+            id: Spinner
+            size_hint: [0.1, 0.05]
+            pos_hint: {'left': 1, 'top': 1}
+            text: 'Input Test Dates'
+            values: ['Main Menu','Settings', 'Timer', 'Weekly Timetable']
+            on_text:
+                if Spinner.text == 'Main Menu': \
+                app.root.current = 'menu'
+                if Spinner.text == 'Settings': \
+                app.root.current = 'settings'
+                if Spinner.text == 'Timer': \
+                app.root.current = 'Timer_screen'
+                if Spinner.text == 'Weekly Timetable': \
+                app.root.current = 'weeklyTimetable'
+
+<MainMenu>:
+    on_enter: self.datatable()
+    RelativeLayout:
+        canvas.before:
+            Color:
+                rgba: 223/255, 103/255, 140/255, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            id: quote
+
+        Button:
+            pos_hint: {'right': 1, 'top': 1}
+            size_hint: [0.05, 0.05]
+            text: 'To-Do list '
+
+        Spinner:
+            id: Spinner
+            size_hint: [0.1, 0.05]
+            pos_hint: {'left': 1, 'top': 1}
+            text: 'Main Menu'
+            values: ['Settings', 'Timer', 'Weekly Timetable', 'Input Test Dates']
+            on_text:
+                if Spinner.text == 'Settings': \
+                app.root.current = 'settings'
+                if Spinner.text == 'Timer': \
+                app.root.current = 'Timer_screen'
+                if Spinner.text == 'Weekly Timetable': \
+                app.root.current = 'weeklyTimetable'
+                if Spinner.text == 'Input Test Dates': \
+                app.root.current = 'testDates'
+
+<WeeklyTimetable>:
+    on_enter: self.datatable()
+    RelativeLayout:
+        canvas.before:
+            Color:
+                rgba: 223/255, 103/255, 140/255, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Spinner:
+            id: Spinner
+            size_hint: [0.1, 0.05]
+            pos_hint: {'left': 1, 'top': 1}
+            text: 'Weekly Timetable'
+            values: ['Main Menu','Settings', 'Timer', 'Input Test Dates']
+            on_text:
+                if Spinner.text == 'Main Menu': \
+                app.root.current = 'menu'
+                if Spinner.text == 'Settings': \
+                app.root.current = 'settings'
+                if Spinner.text == 'Timer': \
+                app.root.current = 'Timer_screen'
+                if Spinner.text == 'Input Test Dates': \
+                app.root.current = 'testDates'
+
 <StartScreen>:
     orientation: "vertical"
     FloatLayout:
@@ -58,14 +246,18 @@
                         write_tab: False
                         pos_hint: {"center_x": 0.5}
                         password: True
-                        on_text_validate: root.authenticate()
+                        on_text_validate:
+                            if app.signin(self) == True: \
+                            app.root.current = "menu"
                     BoxLayout:
                         orientation: "vertical"
                         MDFillRoundFlatButton:
                             text: "SIGN IN"
                             size_hint_x: 0.8
                             pos_hint: {"center_x": 0.5}
-                            on_release: app.signin()
+                            on_release:
+                                if app.signin(self) == True: \
+                                app.root.current = "menu"
                         MDRectangleFlatButton:
                             text: "Don't have an account?"
                             pos_hint: {"center_x": 0.5}
@@ -128,6 +320,7 @@
         halign: "center"
         font_size: 12
         id: error
+
     MDTextField:
         id: HL1
         required: True
