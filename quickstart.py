@@ -1,11 +1,11 @@
-from __future__ import print_function
+from google.auth.exceptions import RefreshError
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from datetime import date
 import time
-import os.path
+import os
 
 today = date.today()
 
@@ -28,7 +28,11 @@ def main():
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
+            try:
+                creds.refresh(Request())
+            except RefreshError:
+                os.remove("token.json")
+                main()
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
                 'credentials.json', SCOPES)
@@ -46,8 +50,7 @@ def main():
     def make_list():
         for course in courses:
             course_id = course['id']
-            results1 = service.courses().courseWork().list(courseId=course_id, orderBy='dueDate desc',
-                                                           pageSize=2).execute()
+            results1 = service.courses().courseWork().list(courseId=course_id, orderBy='dueDate desc').execute()
             try:
                 for courseWork in results1["courseWork"]:
                     try:
@@ -56,8 +59,8 @@ def main():
                         duedates = str(dueDate['day']) + "/" + str(dueDate['month']) + "/" + str(dueDate['year'])
                         newdate1 = time.strptime(duedates, "%d/%m/%Y")
                         if d3 < newdate1:
-                            dates.append([int((time.mktime(newdate1) - time.mktime(d3)) // 86400), str(courseWork['title']),
-                                          str(courseWork['description']), str(courseWork['id'])])
+                            dates.append([int((time.mktime(newdate1) - time.mktime(d3)) // 86400),
+                                          str(courseWork['title']), str(courseWork['description']), str(courseWork['id'])])
                     except KeyError:
                         continue
             except KeyError:

@@ -1,41 +1,423 @@
-from time import strftime
+import os
 
+from kivy.core.window import Window
 from kivy.metrics import dp
+from kivy.properties import StringProperty
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.boxlayout import *
-from kivy.uix.button import Button
-from kivy.uix.dropdown import DropDown
-from kivy.uix.label import Label
-from kivy.uix.popup import Popup
-from kivy.lang import Builder
+from kivy.uix.checkbox import CheckBox
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.utils import get_color_from_hex
 from kivymd.app import MDApp
 from kivymd.uix.datatables import MDDataTable
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton
 from kivy.config import Config
-from datetime import date
+from datetime import date, datetime
+from kivy.lang import Builder
+from kivymd.uix.behaviors import FakeRectangularElevationBehavior
+from kivymd.uix.floatlayout import MDFloatLayout
 import calendar
-from kivy.core.window import Window
-from kivy.uix.spinner import Spinner
-from time import strftime
-from kivy.app import App
-from kivy.clock import Clock
-from kivy.core.text import LabelBase
 import sqlite3
 import random
+from kivymd.uix.snackbar import Snackbar
 import quickstart
+from kivymd.uix.selectioncontrol import MDCheckbox
+from kivymd.uix.picker import MDDatePicker
+import time
 
 con = sqlite3.connect('ReviseTime.db')
+cur = con.cursor()
 Builder.load_file("kivy.kv")
-
-Config.set('graphics', 'fullscreen', 'fake')
+Config.set('graphics', 'resizeable', 1)
+Config.set('graphics', 'position', "auto")
 Config.write()
+sm = ScreenManager()
 
 
-class Screen_Manager(ScreenManager):
-    pass
+class TestDates(Screen):
+    dialog = None
+
+    def delete(self):
+        if not self.dialog:
+            self.dialog = MDDialog(
+                title="Delete deadline?",
+                auto_dismiss=False,
+                buttons=[
+                    MDFlatButton(
+                        text="Cancel", on_release=self.close_dialog
+                    ),
+                    MDFlatButton(
+                        text="Confirm", on_release=lambda x: self.cancel()
+                    ),
+                ],
+            )
+        self.dialog.open()
+
+    def cancel(self):
+        for child in reversed(sm.get_screen('testDates').ids.todo_list.children):
+            for c in child.children:
+                if isinstance(c, MDCheckbox):
+                    if c.active:
+                        title = child.title
+                        desc = child.description
+        # remove from text file
+        with open('Dates.txt', 'r') as f:
+            lines = f.readlines()
+            for line in lines:
+                desc_days = time.strptime(str(desc).strip('\n'), "%d/%m/%Y")
+                today = date.today()
+                today1 = time.strptime(today.strftime("%d/%m/20%y"), "%d/%m/%Y")
+                days = int((time.mktime(desc_days) - time.mktime(today1)) // 86400)
+                if line.strip('\n') == str(days)+','+str(title)+','+str(desc).strip('\n'):
+                    lines.remove(line)
+        with open('Dates.txt', 'w') as f:
+            x = 0
+            for line in lines:
+                lines[x] = line.strip('\n')
+                x += 1
+            for line in lines:
+                f.write(line+'\n')
+        self.close_dialog(self.dialog)
+        for elements in sm.get_screen('testDates').ids.todo_list.children:
+            if elements.ids.title.text == title and elements.ids.description.text == desc:
+                elements.parent.remove_widget(elements)
+                for child in reversed(sm.get_screen('testDates').ids.todo_list.children):
+                    for c in child.children:
+                        if isinstance(c, MDCheckbox):
+                            c.active = False
+            else:
+                continue
+
+    def close_dialog(self, obj):
+        for child in reversed(sm.get_screen('testDates').ids.todo_list.children):
+            for c in child.children:
+                if isinstance(c, MDCheckbox):
+                    c.active = False
+        self.dialog.dismiss()
+
+    def remove(self):
+        for elements in sm.get_screen('testDates').ids.todo_list.children:
+            elements.parent.clear_widgets(children=None)
+
+    def add_todo(self, title, description):
+        self.ids.todo_list.add_widget(DateCard(title=title, description=description))
+
+    def add_todos(self, title):
+        if title != "" and len(title) < 21 and sm.get_screen(
+                'add_date').ids.btn.text != 'ADD DEADLINE':
+            btntext = sm.get_screen('add_date').ids.btn.text
+            x = btntext.split(': ')
+            x1 = x[1].split('-')
+            today = date.today()
+            today1 = time.strptime(today.strftime("%d/%m/20%y"), "%d/%m/%Y")
+            dateselected = (x1[2] + '/' + x1[1] + '/' + x1[0])
+            datepicked = time.strptime(dateselected, "%d/%m/%Y")
+            days = int((time.mktime(datepicked) - time.mktime(today1)) // 86400)
+            if days < 0:
+                Snackbar(text="Cannot set a deadline for the past :)", snackbar_x="10dp", snackbar_y="10dp",
+                         size_hint_y=.08,
+                         size_hint_x=(Window.width - (dp(10) * 2)) / Window.width, bg_color=(1, 170 / 255, 23 / 255, 1),
+                         font_size="18sp").open()
+            else:
+                with open("Dates.txt", "r") as f:
+                    x = 0
+                    lines = f.readlines()
+                    lines.append(str(days) + ',' + title + ',' + str(dateselected))
+                    print(lines)
+                    for line in lines:
+                        lines[x] = line.strip('\n')
+                        x += 1
+                with open("Dates.txt", "w") as f:
+                    for line in lines:
+                        f.write(line + '\n')
+                sm.current = "testDates"
+                sm.get_screen("add_date").ids.title.text = ""
+                sm.get_screen('add_date').ids.btn.text = "ADD DEADLINE"
+        elif title == "":
+            Snackbar(text="Title is missing", snackbar_x="10dp", snackbar_y="10dp", size_hint_y=.08,
+                     size_hint_x=(Window.width - (dp(10) * 2)) / Window.width, bg_color=(1, 170 / 255, 23 / 255, 1),
+                     font_size="18sp").open()
+        elif len(title) > 21:
+            Snackbar(text="Title too long", snackbar_x="10dp", snackbar_y="10dp", size_hint_y=.08,
+                     size_hint_x=(Window.width - (dp(10) * 2)) / Window.width,
+                     bg_color=(1, 170 / 255, 23 / 255, 1),
+                     font_size="18sp").open()
+        elif sm.get_screen('add_date').ids.btn.text == 'ADD DEADLINE':
+            Snackbar(text="No date added", snackbar_x="10dp", snackbar_y="10dp", size_hint_y=.08,
+                     size_hint_x=(Window.width - (dp(10) * 2)) / Window.width,
+                     bg_color=(1, 170 / 255, 23 / 255, 1),
+                     font_size="18sp").open()
+
+    def change_dates(self):
+        with open('Dates.txt', 'r') as f:
+            lines = f.readlines()
+            for line in reversed(lines):
+                y = line.split(',')
+                actual_days = time.strptime(str(y[2].strip('\n')), "%d/%m/%Y")
+                today = date.today()
+                today1 = time.strptime(today.strftime("%d/%m/20%y"), "%d/%m/%Y")
+                days = int((time.mktime(actual_days) - time.mktime(today1)) // 86400)
+                if days < 0:
+                    lines.remove(line)
+                else:
+                    lines[lines.index(line)] = (str(days) + ',' + y[1] + ',' + str(y[2]))
+        with open('Dates.txt', 'w') as f:
+            x = 0
+            for line in lines:
+                lines[x] = line.strip('\n')
+                x += 1
+            for line in lines:
+                f.write(line+'\n')
+
+    def sort_txt_file(self):
+        with open('Dates.txt', 'r') as f:
+            lines = f.readlines()
+            x = 0
+            for line in lines:
+                lines[x] = line.strip('\n')
+                x += 1
+            lines.sort()
+        with open('Dates.txt', 'w') as f:
+            for line in lines:
+                f.write(line + '\n')
+
+    def on_start(self):
+        self.remove()
+        self.change_dates()
+        self.sort_txt_file()
+        today = date.today()
+        wd = date.weekday(today)
+        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        year = str(datetime.now().year)
+        month = str(datetime.now().strftime("%b"))
+        day = str(datetime.now().strftime("%d"))
+        sm.get_screen('testDates').ids.date.text = f"{days[wd]}, {day} {month} {year}"
+        with open('Dates.txt', 'r') as f:
+            lines = f.readlines()
+            for line in lines:
+                x = line.split(',')
+                title = x[1]
+                desc = x[2]
+                TestDates.add_todo(sm.get_screen('testDates'), title, desc)
+
+    def datepicker(self):
+        date_dialog = MDDatePicker()
+        date_dialog.bind(on_save=self.on_save)
+        date_dialog.open()
+
+    def on_save(self, instance, value, date_range):
+        sm.get_screen('add_date').ids.btn.text = ('ADD DEADLINE: ' + str(value))
+
+
+class addDate(Screen):
+    def on_start(self):
+        self.ids.btn.text = "ADD DEADLINE"
+
+    def datepicker(self):
+        TestDates.datepicker(sm.get_screen('testDates'))
+
+    def add_todo(self, title):
+        TestDates.add_todos(sm.get_screen('testDates'), title)
+
+
+class DateCard(FakeRectangularElevationBehavior, MDFloatLayout):
+    title = StringProperty()
+    description = StringProperty()
+
+    def on_complete(self, checkbox, value, description, bar, title):
+        if value:
+            description.text = f"[s]{description.text}[/s]"
+            bar.md_bg_color = 0, 179 / 255, 0, 1
+            TestDates.delete(sm.get_screen('testDates'))
+        else:
+            remove = ["[s]", "[/s]"]
+            for i in remove:
+                description.text = description.text.replace(i, "")
+                bar.md_bg_color = 1, 170 / 255, 23 / 255, 1
+
+
+class LinkedList:
+    def __init__(self, data=None):
+        if data is None:
+            data = [(None, None)]
+        self.title = data[0][0]
+        self.desc = data[0][1]
+        self.tail = None if (len(data) == 1) else LinkedList(data[1:])
+
+    def insert(self, val):
+        new = LinkedList(val)
+        new.tail = self.tail
+        self.tail = new
+
+    def print_title(self, curr, i):
+        x = 0
+        while curr:
+            if x == i:
+                return curr.title
+            curr = curr.tail
+            x = x + 1
+
+    def print_desc(self, curr, i):
+        x = 0
+        while curr:
+            if x == i:
+                return curr.desc
+            curr = curr.tail
+            x = x + 1
+
+
+class TodoCard(FakeRectangularElevationBehavior, MDFloatLayout):
+    title = StringProperty()
+    description = StringProperty()
+
+    def on_complete(self, checkbox, value, description, bar, title):
+        if value:
+            description.text = f"[s]{description.text}[/s]"
+            bar.md_bg_color = 0, 179 / 255, 0, 1
+            TodoScreen.delete(sm.get_screen('todo'))
+        else:
+            remove = ["[s]", "[/s]"]
+            for i in remove:
+                description.text = description.text.replace(i, "")
+                bar.md_bg_color = 1, 170 / 255, 23 / 255, 1
+
+
+class TodoScreen(Screen):
+    dialog = None
+
+    def delete(self):
+        if not self.dialog:
+            self.dialog = MDDialog(
+                title="Delete task?",
+                auto_dismiss=False,
+                buttons=[
+                    MDFlatButton(
+                        text="Cancel", on_release=self.close_dialog
+                    ),
+                    MDFlatButton(
+                        text="Confirm", on_release=lambda x: self.cancel()
+                    ),
+                ],
+            )
+        self.dialog.open()
+
+    def cancel(self):
+        for child in reversed(sm.get_screen('todo').ids.todo_list.children):
+            for c in child.children:
+                if isinstance(c, MDCheckbox):
+                    if c.active:
+                        title = child.title
+                        desc = child.description
+        delete = "DELETE FROM Todolist WHERE Title=? AND Description=?"
+        cur.execute(delete, (title, desc))
+        con.commit()
+        self.close_dialog(self.dialog)
+        for elements in sm.get_screen('todo').ids.todo_list.children:
+            if elements.ids.title.text == title and elements.ids.description.text == desc:
+                elements.parent.remove_widget(elements)
+                for child in reversed(sm.get_screen('todo').ids.todo_list.children):
+                    for c in child.children:
+                        if isinstance(c, MDCheckbox):
+                            c.active = False
+            else:
+                continue
+
+    def close_dialog(self, obj):
+        for child in reversed(sm.get_screen('todo').ids.todo_list.children):
+            for c in child.children:
+                if isinstance(c, MDCheckbox):
+                    c.active = False
+        self.dialog.dismiss()
+
+    def remove(self):
+        for elements in sm.get_screen('todo').ids.todo_list.children:
+            elements.parent.clear_widgets(children=None)
+
+    def add_todo(self, title, description):
+        self.ids.todo_list.add_widget(TodoCard(title=title, description=description))
+
+    def add_todos(self, title, description):
+        if title != "" and description != "" and len(title) < 21 and len(description) < 61 and sm.get_screen(
+                'add_todo').ids.btn.text != 'ADD TASK':
+            btntext = sm.get_screen('add_todo').ids.btn.text
+            x = btntext.split(': ')
+            x1 = x[1].split('-')
+            today = date.today()
+            today1 = time.strptime(today.strftime("%d/%m/20%y"), "%d/%m/%Y")
+            datepicked = time.strptime((x1[2] + '/' + x1[1] + '/' + x1[0]), "%d/%m/%Y")
+            days = int((time.mktime(datepicked) - time.mktime(today1)) // 86400)
+            if days < 0:
+                Snackbar(text="Cannot set a task for the past :)", snackbar_x="10dp", snackbar_y="10dp",
+                         size_hint_y=.08,
+                         size_hint_x=(Window.width - (dp(10) * 2)) / Window.width, bg_color=(1, 170 / 255, 23 / 255, 1),
+                         font_size="18sp").open()
+            else:
+                insert = ("INSERT INTO Todolist(Title, Description, Days, Date)"
+                          "VALUES (?, ?, ?, ?)")
+                data = (title, description, days, x[1])
+                cur.execute(insert, data)
+                con.commit()
+                sm.current = "todo"
+                sm.get_screen("add_todo").ids.description.text = ""
+                sm.get_screen("add_todo").ids.title.text = ""
+                sm.get_screen('add_todo').ids.btn.text = "ADD TASK"
+        elif title == "":
+            Snackbar(text="Title is missing", snackbar_x="10dp", snackbar_y="10dp", size_hint_y=.08,
+                     size_hint_x=(Window.width - (dp(10) * 2)) / Window.width, bg_color=(1, 170 / 255, 23 / 255, 1),
+                     font_size="18sp").open()
+        elif description == "":
+            Snackbar(text="Description is missing", snackbar_x="10dp", snackbar_y="10dp", size_hint_y=.08,
+                     size_hint_x=(Window.width - (dp(10) * 2)) / Window.width,
+                     bg_color=(1, 170 / 255, 23 / 255, 1),
+                     font_size="18sp").open()
+        elif len(title) > 21:
+            Snackbar(text="Title too long", snackbar_x="10dp", snackbar_y="10dp", size_hint_y=.08,
+                     size_hint_x=(Window.width - (dp(10) * 2)) / Window.width,
+                     bg_color=(1, 170 / 255, 23 / 255, 1),
+                     font_size="18sp").open()
+        elif len(description) > 61:
+            Snackbar(text="Description too long", snackbar_x="10dp", snackbar_y="10dp", size_hint_y=.08,
+                     size_hint_x=(Window.width - (dp(10) * 2)) / Window.width,
+                     bg_color=(1, 170 / 255, 23 / 255, 1),
+                     font_size="18sp").open()
+        elif sm.get_screen('add_todo').ids.btn.text == 'ADD TASK':
+            Snackbar(text="No date added", snackbar_x="10dp", snackbar_y="10dp", size_hint_y=.08,
+                     size_hint_x=(Window.width - (dp(10) * 2)) / Window.width,
+                     bg_color=(1, 170 / 255, 23 / 255, 1),
+                     font_size="18sp").open()
+
+    def on_start(self):
+        today = date.today()
+        wd = date.weekday(today)
+        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        year = str(datetime.now().year)
+        month = str(datetime.now().strftime("%b"))
+        day = str(datetime.now().strftime("%d"))
+        self.ids.date.text = f"{days[wd]}, {day} {month} {year}"
+        statement = "SELECT Title, Description FROM Todolist ORDER BY Days ASC"
+        cur.execute(statement)
+        tasks = cur.fetchall()
+        for task in tasks:
+            TodoScreen.add_todo(sm.get_screen('todo'), task[0], task[1])
+
+    def datepicker(self):
+        date_dialog = MDDatePicker()
+        date_dialog.bind(on_save=self.on_save)
+        date_dialog.open()
+
+    def on_save(self, instance, value, date_range):
+        sm.get_screen('add_todo').ids.btn.text = ('ADD TASK: ' + str(value))
+
+
+class addTodo(Screen):
+    def on_start(self):
+        self.ids.btn.text = "ADD TASK"
+
+    def datepicker(self):
+        TodoScreen.datepicker(sm.get_screen('todo'))
+
+    def add_todo(self, title, description):
+        TodoScreen.add_todos(sm.get_screen('todo'), title, description)
 
 
 class TouchApp(MDApp):
@@ -50,7 +432,16 @@ class TouchApp(MDApp):
     def build(self):
         self.theme_cls.primary_palette = "Green"  # "Purple", "Red"
         self.theme_cls.primary_hue = "300"  # "500"
-        return Screen_Manager()
+        sm.add_widget(StartScreen(name='start'))
+        sm.add_widget(MainMenu(name='menu'))
+        sm.add_widget(WeeklyTimetable(name='weeklyTimetable'))
+        sm.add_widget(Settings_Screen(name='settings'))
+        sm.add_widget(Timers(name='Timer_screen'))
+        sm.add_widget(TestDates(name='testDates'))
+        sm.add_widget(addDate(name='add_date'))
+        sm.add_widget(TodoScreen(name='todo'))
+        sm.add_widget(addTodo(name='add_todo'))
+        return sm
 
     def signup(self):
         if not self.dialog:
@@ -128,7 +519,6 @@ class TouchApp(MDApp):
                 break
         if check:
             self.create.content_cls.ids.error.text = ""
-            cur = con.cursor()
             insert = ("INSERT INTO Settings(Name, Email, Password)"
                       "VALUES (?, ?, ?)")
             data = (self.dialog.content_cls.ids.forename.text, self.dialog.content_cls.ids.email.text,
@@ -151,12 +541,16 @@ class TouchApp(MDApp):
 
     def signin(self, obj):
         id = self.root.get_screen('start')
-        if id.ids.email.text == "1" and id.ids.passwd.text == "2":
-            id.ids.email.text = ''
-            id.ids.passwd.text = ''
-            return True
-        else:
-            return False
+        statement = "SELECT Email, Password FROM Settings ORDER BY Name ASC"
+        cur.execute(statement)
+        users = cur.fetchall()
+        for user in users:
+            if user[0] == id.ids.email.text:
+                if user[1] == id.ids.passwd.text:
+                    id.ids.email.text = ''
+                    id.ids.passwd.text = ''
+                    return True
+        return False
 
 
 class WeeklyTimetable(Screen):
@@ -166,7 +560,7 @@ class WeeklyTimetable(Screen):
             elevation=2,
             background_color=[1.0, 1.0, 1.0, 1.0],
             pos_hint={'center_x': 0.5, 'center_y': 0.5},
-            size_hint=(0.9, 0.7),
+            size_hint=(0.9, 0.72),
             column_data=[
                 ("Pic", dp(20)),
                 ("Monday", dp(35)),
@@ -250,13 +644,13 @@ class WeeklyTimetable(Screen):
                 ),
                 (
                     "8 pm",
-                    "Revision",
-                    "Revision",
-                    "Revision",
-                    "Revision",
-                    "Revision",
-                    "Revision",
-                    "Revision",
+                    "Task",
+                    "Task",
+                    "Task",
+                    "Task",
+                    "Task",
+                    "Task",
+                    "Task",
                 ),
                 (
                     "9 pm",
@@ -286,9 +680,19 @@ class WeeklyTimetable(Screen):
 
 
 class MainMenu(Screen):
+    def get_tasks(self):
+        statements = "SELECT Title, Description FROM Todolist ORDER BY Days DESC"
+        cur.execute(statements)
+        t = cur.fetchall()
+        tasks = LinkedList()
+        for task in t:
+            tasks.insert([task])
+        return tasks
+
     def on_row_press_weekday(self, instance_table, current_row):
         '''Called when a table row is clicked.'''
         copy2 = quickstart.dates.copy()
+        tasks = self.get_tasks()
         if current_row.index == 7:
             breaktime = MDDialog(title="BreakTime", text="Take a break! :)")
             breaktime.open()
@@ -301,6 +705,9 @@ class MainMenu(Screen):
         if current_row.index == 13:
             IA = MDDialog(title="IA", text="Make list of subjects and choose i from randon.choice")
             IA.open()
+        if current_row.index == 15:
+            Task = MDDialog(title=tasks.print_title(tasks, 1), text=tasks.print_desc(tasks, 1))
+            Task.open()
         if current_row.index == 17:
             Revision = MDDialog(title="Revision", text="Make list of subjects and choose i from randon.choice")
             Revision.open()
@@ -317,12 +724,11 @@ class MainMenu(Screen):
             quote = random.choice(quotes)
             schoold = MDDialog(title="School Time", text=quote)
             schoold.open()
-        else:
-            print('hi')
 
     def on_row_press_weekend(self, instance_table, current_row):
         '''Called when a table row is clicked.'''
         copy2 = quickstart.dates.copy()
+        tasks = self.get_tasks()
         if current_row.index == 7:
             breaktime = MDDialog(title="BreakTime", text="Take a break! :)")
             breaktime.open()
@@ -338,26 +744,45 @@ class MainMenu(Screen):
         if current_row.index == 13:
             IA = MDDialog(title="IA", text="Make list of subjects and choose i from randon.choice")
             IA.open()
-        if current_row.index == 17 or current_row.index == 15 or current_row.index == 3:
+        if current_row.index == 15:
+            Task = MDDialog(title=tasks.print_title(tasks, 1), text=tasks.print_desc(tasks, 1))
+            Task.open()
+        if current_row.index == 17 or current_row.index == 3:
             Revision = MDDialog(title="Revision", text="Make list of subjects and choose i from randon.choice")
             Revision.open()
         if current_row.index == 19:
             hw3d = MDDialog(title="Hw Description", text=str(copy2[2][2]))
             hw3d.open()
-        else:
-            print("hi")
 
     def datatable(self):
+        statement = "SELECT Title, Description, Date FROM Todolist"
+        cur.execute(statement)
+        tasks = cur.fetchall()
+        for task in tasks:
+            today = date.today()
+            x = task[2]
+            x1 = x.split('-')
+            today1 = time.strptime(today.strftime("%d/%m/20%y"), "%d/%m/%Y")
+            datepicked = time.strptime((x1[2] + '/' + x1[1] + '/' + x1[0]), "%d/%m/%Y")
+            days = int((time.mktime(datepicked) - time.mktime(today1)) // 86400)
+            if days < 0:
+                delete = "DELETE FROM Todolist WHERE Title=? AND Description=?"
+                cur.execute(delete, (task[0], task[1]))
+            else:
+                statement = "UPDATE Todolist SET Days=? WHERE Title=? AND Description=?"
+                cur.execute(statement, (days, task[0], task[1]))
+            con.commit()
         copy = quickstart.dates.copy()
+        tasks = self.get_tasks()
         self.weekday = MDDataTable(
             rows_num=20,
             elevation=2,
             background_color=[1.0, 1.0, 1.0, 1.0],
             pos_hint={'center_x': 0.5, 'center_y': 0.5},
-            size_hint=(0.3, 0.7),
+            size_hint=(0.28, 0.72),
             column_data=[
-                ('pic', dp(20)),
-                (calendar.day_name[date.today().weekday()], dp(55)),
+                (calendar.day_name[date.today().weekday()], dp(20)),
+                ("", dp(55)),
             ],
             row_data=[
                 (
@@ -390,7 +815,7 @@ class MainMenu(Screen):
                 ),
                 (
                     "8 pm",
-                    "Revision",
+                    tasks.print_title(tasks, 1),
                 ),
                 (
                     "9 pm",
@@ -408,7 +833,7 @@ class MainMenu(Screen):
             elevation=2,
             background_color=[1.0, 1.0, 1.0, 1.0],
             pos_hint={'center_x': 0.5, 'center_y': 0.5},
-            size_hint=(0.3, 0.7),
+            size_hint=(0.28, 0.72),
             column_data=[
                 ('pic', dp(20)),
                 (calendar.day_name[date.today().weekday()], dp(55)),
@@ -444,7 +869,7 @@ class MainMenu(Screen):
                 ),
                 (
                     "8 pm",
-                    "Revision",
+                    tasks.print_title(tasks, 1),
                 ),
                 (
                     "9 pm",
@@ -481,37 +906,6 @@ class Settings_Screen(Screen):
 
 
 class Timers(Screen):
-    sw_started = False
-    sw_seconds = 0
-
-    def update_time(self, nap):
-        if self.sw_started:
-            self.sw_seconds += nap
-        minutes, seconds = divmod(self.sw_seconds, 60)
-        self.root.ids.stopwatch.text = (
-            '%02d:%02d.[size=40]%02d[/size]'%
-            (int(minutes), int(seconds),
-             int(seconds* 100 % 100))
-        )
-        self.root.ids.time.text = strftime('[b]%H[/b]:%M:%S')
-
-    def on_start(self):
-        Clock.schedule_interval(self.update_time, 0)
-
-    def start_stop(self):
-        self.root.ids.start_stop.text =(
-            'Start' if self.sw_started else 'Stop'
-        )
-        self.sw_started = not self.sw_started
-
-    def reset(self):
-        if self.sw_started:
-            self.root.ids.start_stop.text = 'Start'
-            self.sw_started = False
-        self.sw_seconds = 0
-
-
-class TestDates(Screen):
     pass
 
 
