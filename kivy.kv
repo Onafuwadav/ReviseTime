@@ -1,43 +1,373 @@
-#:import RippleTransition kivy.garden.moretransitions.RippleTransition
-#:import PixelTransition kivy.garden.moretransitions.PixelTransition
-#:import BlurTransition kivy.garden.moretransitions.BlurTransition
-#:import RVBTransition kivy.garden.moretransitions.RVBTransition
+<addDate>:
+    on_enter: root.on_start()
+    MDFloatLayout:
+        md_bg_color: 1, 1, 1, 1
+        MDIconButton:
+            icon: "chevron-left"
+            user_font_size: "40sp"
+            pos_hint: {"center_y": .95}
+            theme_text_color: "ContrastParentBackground"
+            text_color: 1, 170/255, 23/255, 1
+            on_release:
+                app.root.transition.direction = "right"
+                app.root.current = "testDates"
+        MDLabel
+            text: "Add Deadline"
+            pos_hint: {"center_x": .6, "center_y": .88}
+            font_name: "Poppins-SemiBold.ttf"
+            font_size: "35sp"
+        MDFloatLayout:
+            size_hint: .65, .08
+            pos_hint: {"center_x": .5, "center_y": .78}
+            canvas:
+                Color:
+                    rgb: (238/255, 238/255, 238/255, 1)
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [25]
+            TextInput:
+                id: title
+                hint_text: "Title"
+                size_hint: 1, None
+                pos_hint: {"center_x": .6, "center_y": .5}
+                height: self.minimum_height
+                multiline: False
+                cursor_color: 1, 170/255, 23/255, 1
+                cursor_width: "2sp"
+                foreground_color: 1, 170/255, 23/255, 1
+                background_color: 0, 0, 0, 0
+                padding: 15
+                font_name: "Poppins-Regular.ttf"
+                font_size: "18sp"
+        Button:
+            text: "ADD DATE"
+            size_hint: .45, .08
+            pos_hint: {"center_x": .5, "center_y": .66}
+            background_color: 0, 0, 0, 0
+            font_name: "Poppins-SemiBold.ttf"
+            font_size: "18sp"
+            color: 1, 1, 1, 1
+            on_release:
+                root.datepicker()
+            canvas.before:
+                Color:
+                    rgb: (1, 170/255, 23/255, 1)
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [25]
+        Button:
+            id: btn
+            text: "ADD DEADLINE"
+            size_hint: .45, .08
+            pos_hint: {"center_x": .5, "center_y": .56}
+            background_color: 0, 0, 0, 0
+            font_name: "Poppins-SemiBold.ttf"
+            font_size: "18sp"
+            color: 1, 1, 1, 1
+            on_release:
+                root.add_todo(title.text)
+            canvas.before:
+                Color:
+                    rgb: (1, 170/255, 23/255, 1)
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [25]
 
-<Screen_Manager>:
-    id: screen_manager
-    StartScreen:
-        id: 'start_screen'
-        name: 'start'
-        manager: 'screen_manager'
-    MainMenu:
-        id: 'main_menu'
-        name: 'menu'
-        manager: 'screen_manager'
-    WeeklyTimetable:
-        id: 'week'
-        name: 'weeklyTimetable'
-        manager: 'screen_manager'
-    Settings_Screen:
-        id: 'settings_screen'
-        name: 'settings'
-        manager: 'screen_manager'
-    Timers:
-        id: 'timer_screen'
-        name: 'Timer_screen'
-        manager: 'screen_manager'
-    TestDates:
-        id: 'input_test_dates'
-        name: 'testDates'
-        manager: 'screen_manager'
+
+<DateCard>:
+    elevation: 10
+    md_bg_color: 1, 1, 1, 1
+    radius: [8]
+    size_hint_y: .1
+    MDFloatLayout:
+        id: bar
+        size_hint: .01, .9
+        pos_hint: {"center_x": .02, "center_y": .5}
+        md_bg_color: 1, 170/225, 23/225, 1
+    MDLabel:
+        id: title
+        text: root.title
+        markup: True
+        font_name: "Poppins-SemiBold.ttf"
+        font_size: "20sp"
+        size_hint_x: .8
+        pos_hint: {"center_x": .46, "center_y": .8}
+    MDCheckbox:
+        size_hint: None, None
+        size: "48dp", "48dp"
+        unselected_color: 1, 170/225, 23/225, 1
+        selected_color: 0, 179/255, 0, 1
+        pos_hint: {"center_x": .95, "center_y": .8}
+        on_active: root.on_complete(*args, description, bar, title)
+    MDLabel:
+        id: description
+        text: root.description
+        font_name: "Poppins-Regular.ttf"
+        markup: True
+        size_hint_x: .9
+        line_height: .8
+        pos_hint: {"center_x": .51, "center_y": .4}
+
+<TestDates>:
+    on_enter: root.on_start()
+    date: date
+    todo_list: todo_list
+    id: todo_list
+    MDFloatLayout:
+        md_bg_color: 1, 1, 1, 1
+        MDLabel:
+            text: "My Deadlines"
+            pos_hint: {"center_x": .60, "center_y": .97}
+            font_name: "Poppins-SemiBold.ttf"
+            font_size: "35sp"
+        MDLabel:
+            id: date
+            text: ""
+            pos_hint: {"center_x": .60, "center_y": .92}
+            font_name: "Poppins-Regular.ttf"
+            font_size: "18sp"
+        MDIconButton:
+            icon: "plus"
+            pos_hint: {"center_x": .89, "center_y": .925}
+            user_font_size: "30sp"
+            md_bg_color: 1, 170/255, 23/3255, 1
+            theme_text_color: "ContrastParentBackground"
+            text_color: 1, 1, 1, 1
+            on_release:
+                root.remove()
+                app.root.current = 'add_date'
+                app.root.transition.direction = "left"
+        ScrollView:
+            do_scroll_y: True
+            do_scroll_x: False
+            size_hint_y: .85
+            pos_hint: {"center_x": .5, "y": 0}
+            bar_width: 0
+            GridLayout:
+                id: todo_list
+                cols: 1
+                height: self.minimum_height
+                row_default_height: 80
+                size_hint_y: None
+                padding: 15, 10
+                spacing: 15, 10
+    RelativeLayout:
+        Spinner:
+            id: Spinner
+            size_hint: [0.1, 0.05]
+            pos_hint: {'left': 1, 'top': 1}
+            text: 'Input Test Dates'
+            values: ['Main Menu','Settings', 'Timer', 'Weekly Timetable']
+            on_text:
+                if Spinner.text == 'Main Menu': \
+                app.root.current = 'menu'
+                if Spinner.text == 'Settings': \
+                app.root.current = 'settings'
+                if Spinner.text == 'Timer': \
+                app.root.current = 'Timer_screen'
+                if Spinner.text == 'Weekly Timetable': \
+                app.root.current = 'weeklyTimetable'
+
+
+
+
+
+<addTodo>:
+    on_enter: root.on_start()
+    MDFloatLayout:
+        md_bg_color: 1, 1, 1, 1
+        MDIconButton:
+            icon: "chevron-left"
+            user_font_size: "40sp"
+            pos_hint: {"center_y": .95}
+            theme_text_color: "ContrastParentBackground"
+            text_color: 1, 170/255, 23/255, 1
+            on_release:
+                app.root.transition.direction = "right"
+                app.root.current = "todo"
+        MDLabel
+            text: "Add Task"
+            pos_hint: {"center_x": .6, "center_y": .88}
+            font_name: "Poppins-SemiBold.ttf"
+            font_size: "35sp"
+        MDFloatLayout:
+            size_hint: .85, .08
+            pos_hint: {"center_x": .5, "center_y": .78}
+            canvas:
+                Color:
+                    rgb: (238/255, 238/255, 238/255, 1)
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [25]
+            TextInput:
+                id: title
+                hint_text: "Title"
+                size_hint: 1, None
+                pos_hint: {"center_x": .6, "center_y": .5}
+                height: self.minimum_height
+                multiline: False
+                cursor_color: 1, 170/255, 23/255, 1
+                cursor_width: "2sp"
+                foreground_color: 1, 170/255, 23/255, 1
+                background_color: 0, 0, 0, 0
+                padding: 15
+                font_name: "Poppins-Regular.ttf"
+                font_size: "18sp"
+        MDFloatLayout:
+            size_hint: .85, .28
+            pos_hint: {"center_x": .5, "center_y": .57}
+            canvas:
+                Color:
+                    rgb: (238/255, 238/255, 238/255, 1)
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [25]
+            TextInput:
+                id: description
+                hint_text: "Description"
+                size_hint: 1, None
+                pos_hint: {"center_x": .6, "center_y": .5}
+                height: 180
+                multiline: False
+                cursor_color: 1, 170/255, 23/255, 1
+                cursor_width: "2sp"
+                foreground_color: 1, 170/255, 23/255, 1
+                background_color: 0, 0, 0, 0
+                padding: 15
+                font_name: "Poppins-Regular.ttf"
+                font_size: "18sp"
+        Button:
+            text: "ADD DATE"
+            size_hint: .45, .08
+            pos_hint: {"center_x": .5, "center_y": .36}
+            background_color: 0, 0, 0, 0
+            font_name: "Poppins-SemiBold.ttf"
+            font_size: "18sp"
+            color: 1, 1, 1, 1
+            on_release:
+                root.datepicker()
+            canvas.before:
+                Color:
+                    rgb: (1, 170/255, 23/255, 1)
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [25]
+        Button:
+            id: btn
+            text: "ADD TASK"
+            size_hint: .45, .08
+            pos_hint: {"center_x": .5, "center_y": .26}
+            background_color: 0, 0, 0, 0
+            font_name: "Poppins-SemiBold.ttf"
+            font_size: "18sp"
+            color: 1, 1, 1, 1
+            on_release:
+                root.add_todo(title.text, description.text)
+            canvas.before:
+                Color:
+                    rgb: (1, 170/255, 23/255, 1)
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [25]
+
+<TodoCard>:
+    elevation: 10
+    md_bg_color: 1, 1, 1, 1
+    radius: [8]
+    size_hint_y: .1
+    MDFloatLayout:
+        id: bar
+        size_hint: .01, .9
+        pos_hint: {"center_x": .02, "center_y": .5}
+        md_bg_color: 1, 170/225, 23/225, 1
+    MDLabel:
+        id: title
+        text: root.title
+        markup: True
+        font_name: "Poppins-SemiBold.ttf"
+        font_size: "20sp"
+        size_hint_x: .8
+        pos_hint: {"center_x": .46, "center_y": .8}
+    MDCheckbox:
+        size_hint: None, None
+        size: "48dp", "48dp"
+        unselected_color: 1, 170/225, 23/225, 1
+        selected_color: 0, 179/255, 0, 1
+        pos_hint: {"center_x": .95, "center_y": .8}
+        on_active: root.on_complete(*args, description, bar, title)
+    MDLabel:
+        id: description
+        text: root.description
+        font_name: "Poppins-Regular.ttf"
+        markup: True
+        size_hint_x: .9
+        line_height: .8
+        pos_hint: {"center_x": .51, "center_y": .4}
+
+<TodoScreen>:
+    on_enter: root.on_start()
+    date: date
+    todo_list: todo_list
+    id: todo_list
+    MDFloatLayout:
+        md_bg_color: 1, 1, 1, 1
+        MDLabel:
+            text: "My Tasks"
+            pos_hint: {"center_x": .54, "center_y": .95}
+            font_name: "Poppins-SemiBold.ttf"
+            font_size: "35sp"
+        MDLabel:
+            id: date
+            text: ""
+            pos_hint: {"center_x": .54, "center_y": .89}
+            font_name: "Poppins-Regular.ttf"
+            font_size: "18sp"
+        MDIconButton:
+            icon: "chevron-left"
+            user_font_size: "40sp"
+            pos_hint: {"center_y": .95}
+            theme_text_color: "ContrastParentBackground"
+            text_color: 1, 170/255, 23/255, 1
+            on_release:
+                root.remove()
+                app.root.transition.direction = "right"
+                app.root.current = "menu"
+        MDIconButton:
+            icon: "plus"
+            pos_hint: {"center_x": .89, "center_y": .925}
+            user_font_size: "30sp"
+            md_bg_color: 1, 170/255, 23/3255, 1
+            theme_text_color: "ContrastParentBackground"
+            text_color: 1, 1, 1, 1
+            on_release:
+                root.remove()
+                app.root.current = 'add_todo'
+                app.root.transition.direction = "left"
+        ScrollView:
+            do_scroll_y: True
+            do_scroll_x: False
+            size_hint_y: .85
+            pos_hint: {"center_x": .5, "y": 0}
+            bar_width: 0
+            GridLayout:
+                id: todo_list
+                cols: 1
+                height: self.minimum_height
+                row_default_height: 80
+                size_hint_y: None
+                padding: 15, 10
+                spacing: 15, 10
 
 <Settings_Screen>:
-    RelativeLayout:
-        canvas.before:
-            Color:
-                rgba: 223/255, 103/255, 140/255, 1
-            Rectangle:
-                pos: self.pos
-                size: self.size
+    MDFloatLayout:
+        md_bg_color: 1, 1, 1, 1
         Spinner:
             id: Spinner
             size_hint: [0.1, 0.05]
@@ -53,7 +383,6 @@
                 app.root.current = 'weeklyTimetable'
                 if Spinner.text == 'Input Test Dates': \
                 app.root.current = 'testDates'
-
 
 <Timers>:
     RelativeLayout:
@@ -78,55 +407,11 @@
                 app.root.current = 'weeklyTimetable'
                 if Spinner.text == 'Input Test Dates': \
                 app.root.current = 'testDates'
-    BoxLayout:
-        orientation: 'vertical'
-
         Label:
-            id: time
-            text: '[b]00[/b]:00:00'
-        BoxLayout:
-            height: 90
-            orientation: 'horizontal'
-            padding: 20
-            spacing: 20
-            size_hint: (1, 0)
-
-            Button:
-                id: start_stop
-                text: 'Start'
-                on_press: self.start_stop()
-
-            Button:
-                id: reset
-                text: 'Reset'
-                on_press: self.reset()
-        Label:
-            id: stopwatch
-            text: '00:00.[size=40]00[/size]'
-
-<TestDates>:
-    RelativeLayout:
-        canvas.before:
-            Color:
-                rgba: 223/255, 103/255, 140/255, 1
-            Rectangle:
-                pos: self.pos
-                size: self.size
-        Spinner:
-            id: Spinner
-            size_hint: [0.1, 0.05]
-            pos_hint: {'left': 1, 'top': 1}
-            text: 'Input Test Dates'
-            values: ['Main Menu','Settings', 'Timer', 'Weekly Timetable']
-            on_text:
-                if Spinner.text == 'Main Menu': \
-                app.root.current = 'menu'
-                if Spinner.text == 'Settings': \
-                app.root.current = 'settings'
-                if Spinner.text == 'Timer': \
-                app.root.current = 'Timer_screen'
-                if Spinner.text == 'Weekly Timetable': \
-                app.root.current = 'weeklyTimetable'
+            id: label1
+            text: 'hi'
+            size_hint: [0.3, 0.5]
+            pos_hint: {'center_x': 0.5, 'center_y': 0.7}
 
 <MainMenu>:
     on_enter: self.datatable()
@@ -144,6 +429,9 @@
             pos_hint: {'right': 1, 'top': 1}
             size_hint: [0.05, 0.05]
             text: 'To-Do list '
+            on_press:
+                app.root.current = 'todo'
+                app.root.transition.direction = "left"
 
         Spinner:
             id: Spinner
