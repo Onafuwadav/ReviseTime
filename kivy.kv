@@ -1,7 +1,144 @@
+<Settings2>:
+    orientation: "vertical"
+    spacing: "12dp"
+    size_hint_y: None
+    height: "125dp"
+
+    MDTextField:
+        id: email
+        required: True
+        write_tab: False
+        hint_text: "Email"
+
+    MDTextField:
+        id: password
+        required: True
+        write_tab: False
+        hint_text: "Password"
+
+<Settings3>:
+    orientation: "vertical"
+    spacing: "12dp"
+    size_hint_y: None
+    height: "550dp"
+    MDTextField:
+        id: email
+        write_tab: False
+        hint_text: "Email"
+    MDTextField:
+        id: password
+        write_tab: False
+        hint_text: "Password"
+    MDTextField:
+        id: name
+        write_tab: False
+        hint_text: "Forename"
+    MDTextField:
+        id: HL1
+        helper_text_mode: "on_error"
+        helper_text: "Enter subject"
+        write_tab: False
+        hint_text: "Currently: " + root.H1
+    MDTextField:
+        id: HL2
+        helper_text_mode: "on_error"
+        helper_text: "Enter subject"
+        write_tab: False
+        hint_text: "Currently: " + root.H2
+    MDTextField:
+        id: HL3
+        helper_text_mode: "on_error"
+        helper_text: "Enter subject"
+        write_tab: False
+        hint_text: "Currently: " + root.H3
+    MDTextField:
+        id: SL1
+        helper_text_mode: "on_error"
+        helper_text: "Enter subject"
+        write_tab: False
+        hint_text: "Currently: " + root.S1
+    MDTextField:
+        id: SL2
+        helper_text_mode: "on_error"
+        helper_text: "Enter subject"
+        write_tab: False
+        hint_text: "Currently: " + root.S2
+    MDTextField:
+        id: SL3
+        helper_text: "Enter subject"
+        write_tab: False
+        hint_text: "Currently: " + root.S3
+
+<Settings_Screen>:
+    on_enter: root.on_start()
+    MDFloatLayout:
+        md_bg_color: 1, 1, 1, 1
+        BoxLayout:
+            pos_hint: {'left': .9, 'center_y': .8}
+            Slider:
+                background_width: '0sp'
+                border_horizontal: [0, 0, 0, 0]
+                border_vertical: [0, 0, 0, 0]
+                padding: '2sp'
+                sensitivity: 'handle'
+                id: slider
+                min: 0
+                max: 10
+                step: 1
+                value: root.val
+                orientation: 'horizontal'
+        Button:
+            size_hint: [0.2, 0.1]
+            pos_hint: {'left': 0, 'center_y': .9}
+            text: 'Set volume to '+str(slider.value)
+            on_release:
+                root.SQLite_volume()
+        Button:
+            id: btn
+            text: "Change user Information"
+            size_hint: .45, .08
+            pos_hint: {"center_x": .5, "center_y": .56}
+            background_color: 0, 0, 0, 0
+            font_name: "Poppins-SemiBold.ttf"
+            font_size: "18sp"
+            color: 1, 1, 1, 1
+            on_release:
+                root.open()
+            canvas.before:
+                Color:
+                    rgb: (1, 170/255, 23/255, 1)
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [25]
+        Spinner:
+            id: Spinner
+            size_hint: [0.1, 0.05]
+            pos_hint: {'left': 1, 'top': 1}
+            text: 'Settings'
+            values: ['Main Menu', 'Timer', 'Weekly Timetable', 'Input Test Dates']
+            on_text:
+                if Spinner.text == 'Main Menu': \
+                app.root.current = 'menu'
+                if Spinner.text == 'Timer': \
+                app.root.current = 'Timer_screen'
+                if Spinner.text == 'Weekly Timetable': \
+                app.root.current = 'weeklyTimetable'
+                if Spinner.text == 'Input Test Dates': \
+                app.root.current = 'testDates'
+        Image:
+            source: 'img1.jpg'
+            size_hint: None, None
+            pos_hint: {"left": 0.5, "bottom": 0.5}
+
 <addDate>:
     on_enter: root.on_start()
     MDFloatLayout:
         md_bg_color: 1, 1, 1, 1
+        Image:
+            source: 'img1.jpg'
+            size_hint: None, None
+            pos_hint: {"left": 0.5, "bottom": 0.5}
         MDIconButton:
             icon: "chevron-left"
             user_font_size: "40sp"
@@ -118,6 +255,10 @@
     id: todo_list
     MDFloatLayout:
         md_bg_color: 1, 1, 1, 1
+        Image:
+            source: 'img1.jpg'
+            size_hint: None, None
+            pos_hint: {"left": 0.5, "bottom": 0.5}
         MDLabel:
             text: "My Deadlines"
             pos_hint: {"center_x": .60, "center_y": .97}
@@ -171,10 +312,6 @@
                 if Spinner.text == 'Weekly Timetable': \
                 app.root.current = 'weeklyTimetable'
 
-
-
-
-
 <addTodo>:
     on_enter: root.on_start()
     MDFloatLayout:
@@ -227,6 +364,10 @@
                     size: self.size
                     pos: self.pos
                     radius: [25]
+            Image:
+                source: 'img1.jpg'
+                size_hint: None, None
+                pos_hint: {"left": 0.5, "bottom": 0.5}
             TextInput:
                 id: description
                 hint_text: "Description"
@@ -364,34 +505,23 @@
                 size_hint_y: None
                 padding: 15, 10
                 spacing: 15, 10
-
-<Settings_Screen>:
-    MDFloatLayout:
-        md_bg_color: 1, 1, 1, 1
-        Spinner:
-            id: Spinner
-            size_hint: [0.1, 0.05]
-            pos_hint: {'left': 1, 'top': 1}
-            text: 'Settings'
-            values: ['Main Menu', 'Timer', 'Weekly Timetable', 'Input Test Dates']
-            on_text:
-                if Spinner.text == 'Main Menu': \
-                app.root.current = 'menu'
-                if Spinner.text == 'Timer': \
-                app.root.current = 'Timer_screen'
-                if Spinner.text == 'Weekly Timetable': \
-                app.root.current = 'weeklyTimetable'
-                if Spinner.text == 'Input Test Dates': \
-                app.root.current = 'testDates'
+        Image:
+            source: 'img1.jpg'
+            size_hint: None, None
+            pos_hint: {"left": 0.5, "bottom": 0.5}
 
 <Timers>:
-    RelativeLayout:
-        canvas.before:
-            Color:
-                rgba: 223/255, 103/255, 140/255, 1
-            Rectangle:
-                pos: self.pos
-                size: self.size
+    on_enter: root.on_start()
+    MDFloatLayout:
+        md_bg_color: 1, 1, 1, 1
+        button: button
+        Button:
+            id: button
+            on_press: root.toggle()
+        AnchorLayout:
+            Label:
+                text: "%s:%s" % (root.minutes, root.seconds)
+                font_size: 120
         Spinner:
             id: Spinner
             size_hint: [0.1, 0.05]
@@ -407,32 +537,28 @@
                 app.root.current = 'weeklyTimetable'
                 if Spinner.text == 'Input Test Dates': \
                 app.root.current = 'testDates'
-        Label:
-            id: label1
-            text: 'hi'
-            size_hint: [0.3, 0.5]
-            pos_hint: {'center_x': 0.5, 'center_y': 0.7}
+        Image:
+            source: 'img1.jpg'
+            size_hint: None, None
+            pos_hint: {"left": 0.5, "bottom": 0.5}
 
 <MainMenu>:
     on_enter: self.datatable()
-    RelativeLayout:
-        canvas.before:
-            Color:
-                rgba: 223/255, 103/255, 140/255, 1
-            Rectangle:
-                pos: self.pos
-                size: self.size
+    MDFloatLayout:
+        md_bg_color: 1, 1, 1, 1
         Label:
             id: quote
-
-        Button:
+        MDIconButton:
+            icon: "plus"
             pos_hint: {'right': 1, 'top': 1}
             size_hint: [0.05, 0.05]
-            text: 'To-Do list '
+            user_font_size: "30sp"
+            md_bg_color: 1, 170/255, 23/3255, 1
+            theme_text_color: "ContrastParentBackground"
+            text_color: 1, 1, 1, 1
             on_press:
                 app.root.current = 'todo'
                 app.root.transition.direction = "left"
-
         Spinner:
             id: Spinner
             size_hint: [0.1, 0.05]
@@ -448,16 +574,15 @@
                 app.root.current = 'weeklyTimetable'
                 if Spinner.text == 'Input Test Dates': \
                 app.root.current = 'testDates'
+        Image:
+            source: 'img1.jpg'
+            size_hint: None, None
+            pos_hint: {"left": 0.5, "bottom": 0.5}
 
 <WeeklyTimetable>:
     on_enter: self.datatable()
-    RelativeLayout:
-        canvas.before:
-            Color:
-                rgba: 223/255, 103/255, 140/255, 1
-            Rectangle:
-                pos: self.pos
-                size: self.size
+    MDFloatLayout:
+        md_bg_color: 1, 1, 1, 1
         Spinner:
             id: Spinner
             size_hint: [0.1, 0.05]
@@ -473,26 +598,26 @@
                 app.root.current = 'Timer_screen'
                 if Spinner.text == 'Input Test Dates': \
                 app.root.current = 'testDates'
+        Image:
+            source: 'img1.jpg'
+            size_hint: None, None
+            pos_hint: {"left": 0.5, "bottom": 0.5}
 
 <StartScreen>:
     orientation: "vertical"
-    FloatLayout:
-        canvas.before:
-            Color:
-                rgba: 223/255, 103/255, 140/255, 1
-            Rectangle:
-                pos: self.pos
-                size: self.size
+    MDFloatLayout:
+        md_bg_color: 1, 1, 1, 1
         BoxLayout:
             pos_hint: {"center_x": 0.5, "center_y": 1}
             size_hint: [1, 0.8]
             canvas.before:
                 Color:
-                    rgba: 61/255, 21/255, 95/255, 1
+                    rgb: (1, 170/255, 23/255, 1)
                 RoundedRectangle:
-                    pos: self.pos
                     size: self.size
+                    pos: self.pos
                     radius: [0, 0, 40, 40]
+
         BoxLayout:
             size_hint: [0.6, 0.7]
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
@@ -508,12 +633,10 @@
                         bold: True
                         halign: 'center'
                         valign: 'middle'
-                    AnchorLayout:
-                        anchor_x: 'center'
-                        anchor_y: 'center'
-                        Image:
-                            source: 'images/img1.jpg'
-                            size_hint: None, None
+                    Image:
+                        source: 'img1.jpg'
+                        size_hint: [0.7, 0.7]
+                        pos_hint: {"center_x": 0.5, "center_y": 0.5}
                     MDTextField:
                         id: email
                         icon_left: "email"
